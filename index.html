@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>记账应用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#10B981",
+              accent: "#F59E0B",
+              neutral: "#1F2937",
+              "neutral-light": "#F3F4F6",
+            },
+            fontFamily: {
+              inter: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .wallet-shadow {
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .input-focus {
+          @apply focus:ring-2 focus:ring-primary/50 focus:border-primary;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 font-inter min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-md">
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-neutral">余额</h2>
+            <span class="text-xs text-gray-500">点击输入框修改金额</span>
+          </div>
+
+          <div class="space-y-4" id="wallet-list">
+            <!-- 钱包列表将通过JavaScript动态生成 -->
+          </div>
+        </div>
+
+        <div class="bg-neutral-light px-6 py-4 border-t border-gray-100">
+          <div class="flex justify-between items-center">
+            <span class="font-medium text-gray-700">总资产</span>
+            <span class="text-2xl font-bold text-primary" id="total-amount"
+              >¥0.00</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <footer class="text-center text-gray-500 text-sm">
+        <p>数据已自动保存到本地</p>
+        <p class="mt-1">上次更新: <span id="last-update">从未更新</span></p>
+      </footer>
+    </div>
+
+    <script>
+      // 钱包数据
+      const wallets = [
+        { id: "xc", name: "XC", icon: "fa-credit-card" },
+        { id: "wechat", name: "微信", icon: "fa-wechat" },
+        { id: "alipay", name: "支付宝", icon: "fa-credit-card" },
+        { id: "cmbc", name: "民生银行", icon: "fa-university" },
+        { id: "keyless", name: "无私钥", icon: "fa-lock" },
+        { id: "okx", name: "OKX", icon: "fa-line-chart" },
+        { id: "binance", name: "Binance", icon: "fa-line-chart" },
+        { id: "bitget", name: "Bitget", icon: "fa-line-chart" },
+        { id: "reimbursement", name: "等待报销", icon: "fa-clock-o" },
+        { id: "tenpay", name: "腾讯理财", icon: "fa-pie-chart" },
+      ];
+
+      // 颜色映射
+      const walletColors = {
+        xc: "bg-blue-50 text-blue-700",
+        wechat: "bg-green-50 text-green-700",
+        alipay: "bg-blue-50 text-blue-700",
+        cmbc: "bg-purple-50 text-purple-700",
+        keyless: "bg-gray-50 text-gray-700",
+        okx: "bg-orange-50 text-orange-700",
+        binance: "bg-yellow-50 text-yellow-700",
+        bitget: "bg-red-50 text-red-700",
+        reimbursement: "bg-pink-50 text-pink-700",
+        tenpay: "bg-indigo-50 text-indigo-700",
+      };
+
+      // DOM 加载完成后执行
+      document.addEventListener("DOMContentLoaded", () => {
+        renderWallets();
+        updateTotalAmount();
+        updateLastUpdateTime();
+
+        // 每秒钟更新一次相对时间显示
+        setInterval(updateLastUpdateTime, 1000);
+      });
+
+      // 渲染钱包列表
+      function renderWallets() {
+        const walletList = document.getElementById("wallet-list");
+        walletList.innerHTML = "";
+
+        wallets.forEach((wallet) => {
+          const amount = getWalletAmount(wallet.id);
+          const colorClass =
+            walletColors[wallet.id] || "bg-gray-50 text-gray-700";
+
+          const walletItem = document.createElement("div");
+          walletItem.className =
+            "flex items-center justify-between p-4 bg-white rounded-xl wallet-shadow transition-all duration-300 hover:shadow-md";
+          walletItem.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center">
+              <i class="fa ${wallet.icon}"></i>
+            </div>
+            <span class="font-medium">${wallet.name}</span>
+          </div>
+          <div class="flex items-center">
+            <span class="text-gray-500 mr-2">¥</span>
+            <input 
+              type="number" 
+              class="w-24 text-right font-medium input-focus border-0 outline-none rounded-md px-2 py-1 transition-all duration-200" 
+              value="${amount}" 
+              data-wallet-id="${wallet.id}"
+            >
+          </div>
+        `;
+
+          walletList.appendChild(walletItem);
+
+          // 添加输入框事件监听
+          const input = walletItem.querySelector("input");
+          input.addEventListener("blur", saveWalletAmount);
+          input.addEventListener("input", formatNumber);
+        });
+      }
+
+      // 格式化数字输入
+      function formatNumber(e) {
+        let value = e.target.value;
+        // 只允许数字和小数点
+        value = value.replace(/[^0-9.]/g, "");
+        // 限制小数点后两位
+        const parts = value.split(".");
+        if (parts.length > 1) {
+          parts[1] = parts[1].slice(0, 2);
+          value = parts.join(".");
+        }
+        e.target.value = value;
+      }
+
+      // 保存钱包金额到localStorage
+      function saveWalletAmount(e) {
+        const walletId = e.target.dataset.walletId;
+        let amount = parseFloat(e.target.value) || 0;
+        amount = Math.round(amount * 100) / 100; // 保留两位小数
+
+        localStorage.setItem(`wallet_${walletId}`, amount.toString());
+        e.target.value = amount.toFixed(2);
+
+        updateTotalAmount();
+        updateLastUpdateTime(true);
+
+        // 添加保存动画效果
+        const walletItem = e.target.closest(".wallet-shadow");
+        walletItem.classList.add("bg-green-50");
+        setTimeout(() => {
+          walletItem.classList.remove("bg-green-50");
+        }, 500);
+      }
+
+      // 获取钱包金额
+      function getWalletAmount(walletId) {
+        const amount = localStorage.getItem(`wallet_${walletId}`);
+        return amount ? parseFloat(amount).toFixed(2) : "0.00";
+      }
+
+      // 更新总金额
+      function updateTotalAmount() {
+        let total = 0;
+        wallets.forEach((wallet) => {
+          const amount = parseFloat(getWalletAmount(wallet.id));
+          total += amount;
+        });
+
+        const totalElement = document.getElementById("total-amount");
+        totalElement.textContent = `¥${total.toFixed(2)}`;
+
+        // 添加动画效果
+        totalElement.classList.add("scale-105");
+        setTimeout(() => {
+          totalElement.classList.remove("scale-105");
+        }, 300);
+      }
+
+      // 更新最后更新时间
+      function updateLastUpdateTime(forceUpdate = false) {
+        const lastUpdateElement = document.getElementById("last-update");
+        const lastUpdateTime = localStorage.getItem("lastUpdate");
+
+        if (!lastUpdateTime) {
+          lastUpdateElement.textContent = "从未更新";
+          return;
+        }
+
+        // 如果是强制更新，保存当前时间戳
+        if (forceUpdate) {
+          localStorage.setItem("lastUpdate", new Date().getTime().toString());
+          return updateLastUpdateTime();
+        }
+
+        const now = new Date();
+        const lastTime = new Date(parseInt(lastUpdateTime));
+        const diffInSeconds = Math.floor((now - lastTime) / 1000);
+
+        let relativeTime;
+        if (diffInSeconds < 60) {
+          relativeTime = `${diffInSeconds}秒前`;
+        } else if (diffInSeconds < 3600) {
+          const minutes = Math.floor(diffInSeconds / 60);
+          relativeTime = `${minutes}分钟前`;
+        } else if (diffInSeconds < 86400) {
+          const hours = Math.floor(diffInSeconds / 3600);
+          relativeTime = `${hours}小时前`;
+        } else {
+          const days = Math.floor(diffInSeconds / 86400);
+          relativeTime = `${days}天前`;
+        }
+
+        lastUpdateElement.textContent = relativeTime;
+      }
+    </script>
+  </body>
+</html>
