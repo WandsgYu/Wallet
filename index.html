@@ -65,11 +65,6 @@
           </div>
         </div>
       </div>
-
-      <footer class="text-center text-gray-500 text-sm">
-        <p>数据已自动保存到本地</p>
-        <p class="mt-1">上次更新: <span id="last-update">从未更新</span></p>
-      </footer>
     </div>
 
     <script>
@@ -91,10 +86,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         renderWallets();
         updateTotalAmount();
-        updateLastUpdateTime();
-
-        // 每秒钟更新一次相对时间显示
-        setInterval(updateLastUpdateTime, 1000);
       });
 
       // 渲染钱包列表
@@ -121,6 +112,8 @@
             <span class="text-gray-500 mr-2">¥</span>
             <input 
               type="number" 
+              inputmode="numeric"
+              pattern="[0-9]*"
               class="w-24 text-right font-medium input-focus border-0 outline-none rounded-md px-2 py-1 transition-all duration-200" 
               value="${amount}" 
               data-wallet-id="${wallet.id}"
@@ -154,7 +147,6 @@
         e.target.value = amount;
 
         updateTotalAmount();
-        updateLastUpdateTime(true);
 
         // 添加保存动画效果
         const walletItem = e.target.closest(".wallet-shadow");
@@ -186,43 +178,6 @@
         setTimeout(() => {
           totalElement.classList.remove("scale-105");
         }, 300);
-      }
-
-      // 更新最后更新时间
-      function updateLastUpdateTime(forceUpdate = false) {
-        const lastUpdateElement = document.getElementById("last-update");
-        const lastUpdateTime = localStorage.getItem("lastUpdate");
-
-        if (!lastUpdateTime) {
-          lastUpdateElement.textContent = "从未更新";
-          return;
-        }
-
-        // 如果是强制更新，保存当前时间戳
-        if (forceUpdate) {
-          localStorage.setItem("lastUpdate", new Date().getTime().toString());
-          return updateLastUpdateTime();
-        }
-
-        const now = new Date();
-        const lastTime = new Date(parseInt(lastUpdateTime));
-        const diffInSeconds = Math.floor((now - lastTime) / 1000);
-
-        let relativeTime;
-        if (diffInSeconds < 60) {
-          relativeTime = `${diffInSeconds}秒前`;
-        } else if (diffInSeconds < 3600) {
-          const minutes = Math.floor(diffInSeconds / 60);
-          relativeTime = `${minutes}分钟前`;
-        } else if (diffInSeconds < 86400) {
-          const hours = Math.floor(diffInSeconds / 3600);
-          relativeTime = `${hours}小时前`;
-        } else {
-          const days = Math.floor(diffInSeconds / 86400);
-          relativeTime = `${days}天前`;
-        }
-
-        lastUpdateElement.textContent = relativeTime;
       }
     </script>
   </body>
