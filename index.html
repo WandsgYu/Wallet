@@ -43,6 +43,7 @@
   </head>
   <body class="bg-gray-50 font-inter min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-md">
+      
       <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
         <div class="p-6">
           <div class="flex justify-between items-center mb-6">
@@ -59,7 +60,7 @@
           <div class="flex justify-between items-center">
             <span class="font-medium text-gray-700">总资产</span>
             <span class="text-2xl font-bold text-primary" id="total-amount"
-              >¥0.00</span
+              >¥0</span
             >
           </div>
         </div>
@@ -72,32 +73,18 @@
     </div>
 
     <script>
-      // 钱包数据
+      // 钱包数据 - 仅保留微信、支付宝、民生银行
       const wallets = [
-        { id: "xc", name: "XC", icon: "fa-credit-card" },
         { id: "wechat", name: "微信", icon: "fa-wechat" },
         { id: "alipay", name: "支付宝", icon: "fa-credit-card" },
         { id: "cmbc", name: "民生银行", icon: "fa-university" },
-        { id: "keyless", name: "无私钥", icon: "fa-lock" },
-        { id: "okx", name: "OKX", icon: "fa-line-chart" },
-        { id: "binance", name: "Binance", icon: "fa-line-chart" },
-        { id: "bitget", name: "Bitget", icon: "fa-line-chart" },
-        { id: "reimbursement", name: "等待报销", icon: "fa-clock-o" },
-        { id: "tenpay", name: "腾讯理财", icon: "fa-pie-chart" },
       ];
 
       // 颜色映射
       const walletColors = {
-        xc: "bg-blue-50 text-blue-700",
         wechat: "bg-green-50 text-green-700",
         alipay: "bg-blue-50 text-blue-700",
         cmbc: "bg-purple-50 text-purple-700",
-        keyless: "bg-gray-50 text-gray-700",
-        okx: "bg-orange-50 text-orange-700",
-        binance: "bg-yellow-50 text-yellow-700",
-        bitget: "bg-red-50 text-red-700",
-        reimbursement: "bg-pink-50 text-pink-700",
-        tenpay: "bg-indigo-50 text-indigo-700",
       };
 
       // DOM 加载完成后执行
@@ -153,25 +140,18 @@
       // 格式化数字输入
       function formatNumber(e) {
         let value = e.target.value;
-        // 只允许数字和小数点
-        value = value.replace(/[^0-9.]/g, "");
-        // 限制小数点后两位
-        const parts = value.split(".");
-        if (parts.length > 1) {
-          parts[1] = parts[1].slice(0, 2);
-          value = parts.join(".");
-        }
+        // 只允许数字
+        value = value.replace(/[^0-9]/g, "");
         e.target.value = value;
       }
 
       // 保存钱包金额到localStorage
       function saveWalletAmount(e) {
         const walletId = e.target.dataset.walletId;
-        let amount = parseFloat(e.target.value) || 0;
-        amount = Math.round(amount * 100) / 100; // 保留两位小数
+        let amount = parseInt(e.target.value) || 0;
 
         localStorage.setItem(`wallet_${walletId}`, amount.toString());
-        e.target.value = amount.toFixed(2);
+        e.target.value = amount;
 
         updateTotalAmount();
         updateLastUpdateTime(true);
@@ -187,19 +167,19 @@
       // 获取钱包金额
       function getWalletAmount(walletId) {
         const amount = localStorage.getItem(`wallet_${walletId}`);
-        return amount ? parseFloat(amount).toFixed(2) : "0.00";
+        return amount ? parseInt(amount) : 0;
       }
 
       // 更新总金额
       function updateTotalAmount() {
         let total = 0;
         wallets.forEach((wallet) => {
-          const amount = parseFloat(getWalletAmount(wallet.id));
+          const amount = parseInt(getWalletAmount(wallet.id));
           total += amount;
         });
 
         const totalElement = document.getElementById("total-amount");
-        totalElement.textContent = `¥${total.toFixed(2)}`;
+        totalElement.textContent = `¥${total}`;
 
         // 添加动画效果
         totalElement.classList.add("scale-105");
