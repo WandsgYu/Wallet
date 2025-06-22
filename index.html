@@ -68,13 +68,15 @@
     </div>
 
     <script>
-      // 钱包数据 - 仅保留微信、支付宝、民生银行
+
       const wallets = [
         { id: "wechat_hamburger", name: "微信 汉堡王子", icon: "fa-wechat" },
         { id: "wechat_qixia", name: "微信 柒夏", icon: "fa-wechat" },
+        { id: "licaitong", name: "腾讯理财通", icon: "fa-line-chart" },
         { id: "alipay_account", name: "支付宝账户", icon: "fa-credit-card" },
         { id: "alipay_xiaohebao", name: "支付宝小荷包", icon: "fa-credit-card" },
         { id: "bankcard", name: "银行卡", icon: "fa-university" },
+        
       ];
 
       // 颜色映射
@@ -84,6 +86,7 @@
         alipay_account: "bg-blue-50 text-blue-700",
         alipay_xiaohebao: "bg-blue-50 text-blue-700",
         bankcard: "bg-purple-50 text-purple-700",
+        licaitong: "bg-yellow-50 text-yellow-700",
       };
 
       // DOM 加载完成后执行
@@ -184,5 +187,8 @@
         }, 300);
       }
     </script>
+    <footer class="text-center py-4 text-gray-400 text-sm">
+      <a href="https://github.com/WandsgYu/Wallet/blob/main/index.html" target="_blank" class="underline hover:text-primary">GitHub</a>
+    </footer>
   </body>
 </html>
