@@ -70,16 +70,20 @@
     <script>
       // 钱包数据 - 仅保留微信、支付宝、民生银行
       const wallets = [
-        { id: "wechat", name: "微信", icon: "fa-wechat" },
-        { id: "alipay", name: "支付宝", icon: "fa-credit-card" },
-        { id: "cmbc", name: "民生银行", icon: "fa-university" },
+        { id: "wechat_hamburger", name: "微信 汉堡王子", icon: "fa-wechat" },
+        { id: "wechat_qixia", name: "微信 柒夏", icon: "fa-wechat" },
+        { id: "alipay_account", name: "支付宝账户", icon: "fa-credit-card" },
+        { id: "alipay_xiaohebao", name: "支付宝小荷包", icon: "fa-credit-card" },
+        { id: "bankcard", name: "银行卡", icon: "fa-university" },
       ];
 
       // 颜色映射
       const walletColors = {
-        wechat: "bg-green-50 text-green-700",
-        alipay: "bg-blue-50 text-blue-700",
-        cmbc: "bg-purple-50 text-purple-700",
+        wechat_hamburger: "bg-green-50 text-green-700",
+        wechat_qixia: "bg-green-50 text-green-700",
+        alipay_account: "bg-blue-50 text-blue-700",
+        alipay_xiaohebao: "bg-blue-50 text-blue-700",
+        bankcard: "bg-purple-50 text-purple-700",
       };
 
       // DOM 加载完成后执行
