@@ -76,6 +76,8 @@
         { id: "alipay_account", name: "支付宝账户", icon: "fa-credit-card" },
         { id: "alipay_xiaohebao", name: "支付宝小荷包", icon: "fa-credit-card" },
         { id: "bankcard", name: "银行卡", icon: "fa-university" },
+         { id: "binance", name: "Binance", icon: "https://i.miji.bid/2025/06/25/e6340d79cd3b5f787068423692c49699.png" },
+        { id: "okx", name: "OKX", icon: "https://i.mij.rip/2025/06/25/5703242a362475a9d7dd2b914159ddd4.png" },
         
       ];
 
@@ -108,10 +110,16 @@
           const walletItem = document.createElement("div");
           walletItem.className =
             "flex items-center justify-between p-4 bg-white rounded-xl wallet-shadow transition-all duration-300 hover:shadow-md";
+          let iconHtml = "";
+          if (wallet.icon.startsWith("http")) {
+            iconHtml = `<img src="${wallet.icon}" alt="${wallet.name}" class="w-7 h-7 rounded-full object-contain" />`;
+          } else {
+            iconHtml = `<i class=\"fa ${wallet.icon}\"></i>`;
+          }
           walletItem.innerHTML = `
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center">
-              <i class="fa ${wallet.icon}"></i>
+              ${iconHtml}
             </div>
             <span class="font-medium">${wallet.name}</span>
           </div>
