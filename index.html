@@ -48,7 +48,7 @@
         <div class="p-6">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold text-neutral">余额</h2>
-            <span class="text-xs text-gray-500">点击输入框修改金额</span>
+            <span class="text-xs text-gray-500"></span>
           </div>
 
           <div class="space-y-4" id="wallet-list">
@@ -79,9 +79,7 @@
         { id: "binance", name: "Binance", icon: "https://i.miji.bid/2025/06/25/e6340d79cd3b5f787068423692c49699.png", currency: "USD" },
         { id: "okx", name: "OKX", icon: "https://i.mij.rip/2025/06/25/5703242a362475a9d7dd2b914159ddd4.png", currency: "USD" },
         { id: "bitget", name: "Bitget", icon: "https://i.miji.bid/2025/06/30/096b67ad160c55e959829b913fb1d000.png", currency: "USD" },
-        { id: "bybit", name: "Bybit", icon: "https://i.miji.bid/2025/06/30/cb9ea6cb6d802eeda6ed781177dc0a43.png", currency: "USD" },
-        { id: "huobi", name: "火币", icon: "https://i.miji.bid/2025/06/30/7a01b5edd7dc5e9d514419414d61eee6.png", currency: "USD" },
-      ];
+       ];
 
       // 汇率数据
       let exchangeRate = 7.162; // 默认汇率
@@ -95,6 +93,8 @@
             const rawRate = parseFloat(data.data[0].usdCny);
             exchangeRate = rawRate - 0.06; // 减去0.07作为真实价格
             console.log('汇率更新:', exchangeRate);
+            // 显示原始汇率
+            document.getElementById('raw-rate').textContent = `美元兑人民币汇率：${rawRate}`;
           }
         } catch (error) {
           console.error('获取汇率失败:', error);
@@ -240,6 +240,7 @@
     </script>
     <footer class="text-center py-4 text-gray-400 text-sm">
       <a href="https://github.com/WandsgYu/Wallet/blob/main/index.html" target="_blank" class="underline hover:text-primary">GitHub</a>
+      <div id="raw-rate" class="mt-1 text-xs text-gray-500"></div>
     </footer>
   </body>
 </html>
