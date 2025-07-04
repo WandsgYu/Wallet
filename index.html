@@ -94,7 +94,7 @@
           const data = await response.json();
           if (data.code === "0" && data.data && data.data.length > 0) {
             const rawRate = parseFloat(data.data[0].usdCny);
-            exchangeRate = rawRate - 0.06; // 减去0.07作为真实价格
+            exchangeRate = rawRate - 0.08; // 减去0.07作为真实价格
             console.log('汇率更新:', exchangeRate);
             // 显示原始汇率
             document.getElementById('raw-rate').textContent = `美元兑人民币汇率：${rawRate}`;
