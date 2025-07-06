@@ -85,7 +85,7 @@
        ];
 
       // 汇率数据
-      let exchangeRate = 7.162; // 默认汇率
+      let exchangeRate = null; // 删除默认汇率
 
       // 获取汇率
       async function fetchExchangeRate() {
@@ -94,10 +94,13 @@
           const data = await response.json();
           if (data.code === "0" && data.data && data.data.length > 0) {
             const rawRate = parseFloat(data.data[0].usdCny);
-            exchangeRate = rawRate - 0.09; // 减去0.07作为真实价格
+            exchangeRate = rawRate - 0.09; // 减去0.09作为真实价格
             console.log('汇率更新:', exchangeRate);
             // 显示原始汇率
-            document.getElementById('raw-rate').textContent = `美元兑人民币汇率：${rawRate}`;
+            document.getElementById('raw-rate').textContent = `当前美元兑人民币原始汇率：${rawRate}`;
+            
+            // 汇率获取成功后，开始计算和输出
+            updateTotalAmount();
           }
         } catch (error) {
           console.error('获取汇率失败:', error);
@@ -106,6 +109,10 @@
 
       // 将美元转换为人民币
       function convertUSDToCNY(usdAmount) {
+        if (exchangeRate === null) {
+          console.log('汇率未获取，无法转换美元');
+          return 0;
+        }
         return Math.round(usdAmount * exchangeRate);
       }
 
@@ -123,7 +130,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         fetchExchangeRate(); // 获取汇率
         renderWallets();
-        updateTotalAmount();
       });
 
       // 渲染钱包列表
@@ -217,15 +223,34 @@
 
       // 更新总金额
       function updateTotalAmount() {
+        if (exchangeRate === null) {
+          console.log('汇率未获取，跳过计算');
+          return;
+        }
+        
         let total = 0;
+        console.log('=== 钱包金额计算明细 ===');
+        console.log(`当前汇率: ${exchangeRate}`);
+        console.log('--- 各钱包金额 ---');
+        
         wallets.forEach((wallet) => {
           const amount = parseInt(getWalletAmount(wallet.id));
+          let cnyAmount = 0;
+          
           if (wallet.currency === "USD") {
-            total += convertUSDToCNY(amount);
+            cnyAmount = convertUSDToCNY(amount);
+            console.log(`${wallet.name}: $${amount} × ${exchangeRate} = ¥${cnyAmount}`);
           } else {
-            total += amount;
+            cnyAmount = amount;
+            console.log(`${wallet.name}: ¥${amount}`);
           }
+          
+          total += cnyAmount;
         });
+        
+        console.log('--- 总计 ---');
+        console.log(`总金额: ¥${total.toLocaleString()}`);
+        console.log('==================');
 
         const totalElement = document.getElementById("total-amount");
         const totalInWan = (total / 10000).toFixed(2);
