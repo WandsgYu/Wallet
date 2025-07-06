@@ -253,7 +253,7 @@
         console.log('==================');
 
         const totalElement = document.getElementById("total-amount");
-        const totalInWan = (total / 10000).toFixed(2);
+        const totalInWan = Math.floor(total / 100) / 100; // 取整到小数点后两位
         totalElement.innerHTML = `
           <div class="text-2xl font-bold text-primary">¥${totalInWan}w</div>
           <div class="text-xs text-gray-400">¥${total.toLocaleString()}</div>
