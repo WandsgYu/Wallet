@@ -69,23 +69,14 @@
 
     <script>
 
-      const wallets = [
-        { id: "wechat_hamburger", name: "微信 汉堡王子", icon: "fa-wechat", currency: "CNY" },
-        { id: "wechat_qixia", name: "微信 柒夏", icon: "fa-wechat", currency: "CNY" },
-        { id: "licaitong", name: "腾讯理财通", icon: "https://i.miji.bid/2025/07/05/28e10aa17640f32b311d911053486442.png", currency: "CNY" },
-        { id: "alipay_account", name: "支付宝账户", icon: "https://i.miji.bid/2025/07/05/b4f39b53ce11a0f8173efe6a214d4c16.png", currency: "CNY" },
-        { id: "alipay_xiaohebao", name: "支付宝小荷包", icon: "https://i.miji.bid/2025/07/05/894457f5a4845471c28ce24407d655c6.png", currency: "CNY" },
-        { id: "bankcard", name: "银行卡", icon: "fa-credit-card", currency: "CNY" },
-        { id: "reimburse_pending", name: "等待报销", icon: "fa-hourglass-half", currency: "CNY" },
-        { id: "binance", name: "Binance", icon: "https://i.miji.bid/2025/06/25/e6340d79cd3b5f787068423692c49699.png", currency: "USD" },
-        { id: "bybit", name: "Bybit", icon: "https://i.miji.bid/2025/07/05/d82f5aab547b2374c12f1e189056fd19.png", currency: "USD" },
-        { id: "bitget", name: "Bitget", icon: "https://i.miji.bid/2025/06/30/096b67ad160c55e959829b913fb1d000.png", currency: "USD" },
-        { id: "huobi_new", name: "火币", icon: "https://i.miji.bid/2025/07/05/b820e42cff1e4679e19bdf6f0e600fde.png", currency: "USD" },
-  
-       ];
-
       // 汇率数据
-      let exchangeRate = null; // 删除默认汇率
+      let exchangeRate = 7.17; // 默认初始汇率
+      let exchangeRateFetched = false; // 是否已请求到真实汇率
+
+      // 初始化时优先读取本地存储的汇率
+      if (localStorage.getItem('exchange_rate')) {
+        exchangeRate = parseFloat(localStorage.getItem('exchange_rate'));
+      }
 
       // 获取汇率
       async function fetchExchangeRate() {
@@ -94,12 +85,14 @@
           const data = await response.json();
           if (data.code === "0" && data.data && data.data.length > 0) {
             const rawRate = parseFloat(data.data[0].usdCny);
-            exchangeRate = rawRate - 0.09; // 减去0.09作为真实价格
+            exchangeRate = rawRate - 0.06; // 减去0.06作为真实价格
+            exchangeRateFetched = true;
+            // 更新本地存储
+            localStorage.setItem('exchange_rate', exchangeRate);
             console.log('汇率更新:', exchangeRate);
             // 显示原始汇率
             document.getElementById('raw-rate').textContent = `当前美元兑人民币原始汇率：${rawRate}`;
-            
-            // 汇率获取成功后，开始计算和输出
+            // 汇率获取成功后，刷新计算
             updateTotalAmount();
           }
         } catch (error) {
@@ -126,10 +119,24 @@
         licaitong: "bg-yellow-50 text-yellow-700",
       };
 
+      // 钱包列表
+      const wallets = [
+        { id: "wechat_hamburger", name: "微信 汉堡王子", icon: "fa-wechat", currency: "CNY" },
+        { id: "wechat_qixia", name: "微信 柒夏", icon: "fa-wechat", currency: "CNY" },
+        { id: "licaitong", name: "腾讯理财通", icon: "https://i.miji.bid/2025/07/05/28e10aa17640f32b311d911053486442.png", currency: "CNY" },
+        { id: "alipay_account", name: "支付宝账户", icon: "https://i.miji.bid/2025/07/05/b4f39b53ce11a0f8173efe6a214d4c16.png", currency: "CNY" },
+        { id: "bankcard", name: "银行卡", icon: "fa-credit-card", currency: "CNY" },
+        { id: "binance", name: "Binance", icon: "https://i.miji.bid/2025/06/25/e6340d79cd3b5f787068423692c49699.png", currency: "USD" },
+        { id: "coinw", name: "CoinW", icon: "https://i.mji.rip/2025/07/16/3b982f948b2474367af08452e0cd15d5.png", currency: "USD" },
+        { id: "bitget", name: "Bitget", icon: "https://i.miji.bid/2025/06/30/096b67ad160c55e959829b913fb1d000.png", currency: "USD" },
+        { id: "huobi_new", name: "火币", icon: "https://i.miji.bid/2025/07/05/b820e42cff1e4679e19bdf6f0e600fde.png", currency: "USD" },
+      ];
+
       // DOM 加载完成后执行
       document.addEventListener("DOMContentLoaded", () => {
         fetchExchangeRate(); // 获取汇率
         renderWallets();
+        updateTotalAmount(); // 页面初始就计算一次
       });
 
       // 渲染钱包列表
@@ -223,14 +230,10 @@
 
       // 更新总金额
       function updateTotalAmount() {
-        if (exchangeRate === null) {
-          console.log('汇率未获取，跳过计算');
-          return;
-        }
-        
+        // 这里不再判断 exchangeRate 是否为 null，始终用 exchangeRate 参与计算
         let total = 0;
         console.log('=== 钱包金额计算明细 ===');
-        console.log(`当前汇率: ${exchangeRate}`);
+        console.log(`当前汇率: ${exchangeRate}${exchangeRateFetched ? '（已请求到）' : '（默认值）'}`);
         console.log('--- 各钱包金额 ---');
         
         wallets.forEach((wallet) => {
